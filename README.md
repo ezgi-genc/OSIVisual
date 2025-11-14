@@ -1,5 +1,3 @@
--Ezgi Genç
-
 How It Works:
 User enters a message and selects a protocol (HTTPS, HTTP, FTP, SSH...).
 The simulator encapsulates the packet layer by layer, generating:

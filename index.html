@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSI MODEL SIMULATOR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+        }
+
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid #8b2e3f;
+        }
+
+        .app-header h1 {
+            font-size: 2.5rem;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(139, 46, 63, 0.5);
+            font-family: 'Orbitron', monospace;
+            font-weight: 900;
+            letter-spacing: 4px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #b0b0b0;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .panel {
+            background: linear-gradient(135deg, #2a2a2a 0%, #333333 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            border: 1px solid #444;
+        }
+
+        .panel h2 {
+            color: #e0e0e0;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            padding-bottom: 0.5rem;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            letter-spacing: 3px;
+        }
+
+        .control-panel h2 {
+            border-bottom: 2px solid #8b2e3f;
+        }
+
+        .packet-inspector h2 {
+            border-bottom: 2px solid #666;
+        }
+
+        .log-console h2 {
+            border-bottom: 2px solid #8b2e3f;
+        }
+
+        .control-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-section label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #c0c0c0;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .control-section textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #444;
+            border-radius: 6px;
+            font-family: inherit;
+            resize: vertical;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .control-section select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .control-section input[type="range"] {
+            width: 100%;
+            margin: 0.5rem 0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b2e3f 0%, #a8374d 100%);
+            color: white;
+            border: 1px solid #6b1e2f;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #a8374d 0%, #8b2e3f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 46, 63, 0.4);
+        }
+
+        .btn-secondary {
+            background: #555;
+            color: white;
+            border: 1px solid #666;
+        }
+
+        .btn-danger {
+            background: #444;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #555;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #2a2a2a;
+            cursor: not-allowed;
+            opacity: 0.5;
+            border: 1px solid #333;
+        }
+
+        .layers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .layer {
+            position: relative;
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s;
+            opacity: 0.4;
+            border: 1px solid rgba(139, 46, 63, 0.3);
+        }
+
+        .layer.active {
+            opacity: 1;
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(139, 46, 63, 0.6);
+            border: 1px solid #8b2e3f;
+        }
+
+        .layer.processing {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.02); }
+            50% { transform: scale(1.05); }
+        }
+
+        .layer-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 2px;
+        }
+
+        .packet-indicator {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+        }
+
+        .packet-info {
+            margin-bottom: 1rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #444;
+        }
+
+        .info-row .label {
+            font-weight: 600;
+            color: #c0c0c0;
+        }
+
+        .info-row .value {
+            color: #8b2e3f;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .header-item {
+            margin-bottom: 0.5rem;
+            border: 1px solid #444;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .header-title {
+            padding: 0.75rem;
+            background: #1a1a1a;
+            cursor: pointer;
+            font-weight: 600;
+            color: #c0c0c0;
+        }
+
+        .header-details {
+            padding: 1rem;
+            background: #2a2a2a;
+            font-size: 0.85rem;
+            color: #b0b0b0;
+        }
+
+        .detail-row {
+            padding: 0.25rem 0;
+        }
+
+        .log-console {
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .console-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #0a0a0a;
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            border: 1px solid #222;
+            letter-spacing: 0.5px;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            margin-bottom: 0.25rem;
+            border-radius: 4px;
+            color: #c0c0c0;
+        }
+
+        .log-entry.encapsulation {
+            border-left: 3px solid #8b2e3f;
+        }
+
+        .log-entry.decapsulation {
+            border-left: 3px solid #666;
+        }
+
+        .log-entry.error {
+            border-left: 3px solid #8b2e3f;
+            background: rgba(139, 46, 63, 0.1);
+        }
+
+        .log-entry.security {
+            border-left: 3px solid #ff4444;
+            background: rgba(255, 68, 68, 0.15);
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #1a1a1a;
+            border-radius: 6px;
+            margin-top: 1rem;
+            border: 1px solid #444;
+        }
+
+        .status-value {
+            padding: 0.5rem 1rem;
+            background: #2a2a2a;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #b0b0b0;
+            border: 1px solid #444;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+
+        .status-value.active {
+            background: linear-gradient(135deg, #8b2e3f 0%, #a8374d 100%);
+            color: white;
+            border: 1px solid #8b2e3f;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // OSI Layer Colors
+        const LAYER_COLORS = {
+            'Application': '#FF6B6B',
+            'Presentation': '#4ECDC4',
+            'Session': '#45B7D1',
+            'Transport': '#96CEB4',
+            'Network': '#FFEAA7',
+            'DataLink': '#DFE6E9',
+            'Physical': '#A29BFE',
+        };
+
+        // Layer names
+        const LAYERS = ['Application', 'Presentation', 'Session', 'Transport', 'Network', 'DataLink', 'Physical'];
+
+        function App() {
+            const [payload, setPayload] = useState('Hello, OSI Model!');
+            const [protocol, setProtocol] = useState('HTTPS');
+            const [currentPacket, setCurrentPacket] = useState(null);
+            const [logs, setLogs] = useState([]);
+            const [isSimulating, setIsSimulating] = useState(false);
+            const [activeLayers, setActiveLayers] = useState([]);
+            const [processingLayer, setProcessingLayer] = useState(null);
+            const [speed, setSpeed] = useState(1);
+            const [delay, setDelay] = useState(800);
+
+            const addLog = (layer, action, message) => {
+                setLogs(prev => [...prev, {
+                    id: Date.now() + Math.random(),
+                    time: new Date().toLocaleTimeString('tr-TR'),
+                    layer,
+                    action,
+                    message
+                }]);
+            };
+
+            const generateSecurityData = () => {
+                return {
+                    encryptionKey: `AES-256-${Math.random().toString(36).substr(2, 16).toUpperCase()}`,
+                    hash: `SHA-256:${Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
+                    signature: `RSA-2048:${Array.from({length: 32}, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
+                    nonce: Math.floor(Math.random() * 1000000000)
+                };
+            };
+
+            const generateNetworkData = (layer) => {
+                const protocols = {
+                    'Application': {
+                        protocol: protocol === 'HTTP' ? 'HTTP/1.1' : protocol === 'HTTPS' ? 'HTTPS' : protocol === 'FTP' ? 'FTP' : protocol === 'SSH' ? 'SSH' : protocol,
+                        port: protocol === 'HTTPS' ? 443 : protocol === 'HTTP' ? 80 : protocol === 'FTP' ? 21 : protocol === 'SSH' ? 22 : protocol === 'SMTP' ? 25 : 8080,
+                        statusCode: protocol.includes('HTTP') ? [200, 201, 301, 400, 403, 404, 500][Math.floor(Math.random() * 7)] : null,
+                        method: protocol.includes('HTTP') ? ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'][Math.floor(Math.random() * 5)] : null,
+                        contentType: 'application/json',
+                        userAgent: 'OSI-Simulator/2.0 (Secure)',
+                        cookies: Math.random() > 0.5,
+                        requestUrl: protocol.includes('HTTP') ? `/${['api/users', 'data', 'login', 'dashboard', 'profile'][Math.floor(Math.random() * 5)]}` : null
+                    },
+                    'Presentation': {
+                        encoding: ['UTF-8', 'ASCII', 'UTF-16'][Math.floor(Math.random() * 3)],
+                        compression: ['gzip', 'deflate', 'br', 'none'][Math.floor(Math.random() * 4)],
+                        encryption: protocol === 'HTTPS' || protocol === 'SSH' ? 'TLS 1.3' : protocol === 'HTTP' ? 'None' : ['TLS 1.3', 'TLS 1.2'][Math.floor(Math.random() * 2)],
+                        cipher: protocol === 'HTTPS' || protocol === 'SSH' ? 'AES-256-GCM' : 'None',
+                        certificateAuthority: protocol === 'HTTPS' ? 'DigiCert Global Root CA' : null,
+                        handshakeComplete: protocol === 'HTTPS' || protocol === 'SSH',
+                        sslVersion: protocol === 'HTTPS' ? 'TLSv1.3' : null
+                    },
+                    'Session': {
+                        sessionId: `SES-${Math.random().toString(36).substr(2, 12).toUpperCase()}`,
+                        connectionMode: ['Full-Duplex', 'Half-Duplex', 'Simplex'][Math.floor(Math.random() * 3)],
+                        sessionToken: `TKN-${Math.random().toString(36).substr(2, 16).toUpperCase()}`,
+                        timeout: Math.floor(Math.random() * 3600) + 300,
+                        keepAlive: Math.random() > 0.3,
+                        lastActivity: new Date().toISOString()
+                    },
+                    'Transport': {
+                        protocol: Math.random() > 0.7 ? 'UDP' : 'TCP',
+                        sourcePort: Math.floor(Math.random() * 64512) + 1024,
+                        destinationPort: [80, 443, 22, 21, 25, 53, 3306][Math.floor(Math.random() * 7)],
+                        sequenceNumber: Math.floor(Math.random() * 4294967295),
+                        acknowledgmentNumber: Math.floor(Math.random() * 4294967295),
+                        windowSize: Math.floor(Math.random() * 65535),
+                        flags: {
+                            SYN: Math.random() > 0.5,
+                            ACK: Math.random() > 0.3,
+                            FIN: Math.random() > 0.8,
+                            PSH: Math.random() > 0.6,
+                            RST: Math.random() > 0.9,
+                            URG: Math.random() > 0.95
+                        },
+                        checksum: `0x${Math.floor(Math.random() * 65535).toString(16).toUpperCase().padStart(4, '0')}`
+                    },
+                    'Network': {
+                        protocol: 'IPv4',
+                        sourceIP: `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`,
+                        destinationIP: `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`,
+                        ttl: Math.floor(Math.random() * 128) + 1,
+                        fragmentOffset: Math.floor(Math.random() * 8192),
+                        identification: Math.floor(Math.random() * 65535),
+                        headerChecksum: `0x${Math.floor(Math.random() * 65535).toString(16).toUpperCase().padStart(4, '0')}`,
+                        routingPath: Math.floor(Math.random() * 15) + 1,
+                        qos: ['Best Effort', 'Expedited Forwarding', 'Assured Forwarding'][Math.floor(Math.random() * 3)]
+                    },
+                    'DataLink': {
+                        protocol: 'Ethernet II',
+                        sourceMAC: Array.from({length: 6}, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(':').toUpperCase(),
+                        destinationMAC: Array.from({length: 6}, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join(':').toUpperCase(),
+                        etherType: '0x0800',
+                        vlanId: Math.random() > 0.7 ? Math.floor(Math.random() * 4094) + 1 : null,
+                        frameCheckSequence: `0x${Math.floor(Math.random() * 4294967295).toString(16).toUpperCase().padStart(8, '0')}`,
+                        arpCache: Math.random() > 0.5,
+                        collisionDetected: Math.random() > 0.95
+                    },
+                    'Physical': {
+                        medium: ['Fiber Optic', 'Copper Cat6', 'Copper Cat5e', 'Wireless 802.11ax'][Math.floor(Math.random() * 4)],
+                        bitrate: [`1 Gbps`, `10 Gbps`, `100 Mbps`, `1200 Mbps`][Math.floor(Math.random() * 4)],
+                        encoding: ['Manchester', 'NRZ', '4B/5B', 'MLT-3'][Math.floor(Math.random() * 4)],
+                        signalStrength: `-${Math.floor(Math.random() * 50) + 20} dBm`,
+                        frequency: [`2.4 GHz`, `5 GHz`, `100 MHz`, `1 GHz`][Math.floor(Math.random() * 4)],
+                        duplex: ['Full', 'Half'][Math.floor(Math.random() * 2)],
+                        cableLength: `${Math.floor(Math.random() * 100) + 1}m`
+                    }
+                };
+                return protocols[layer] || {};
+            };
+
+            const detectThreats = (packet) => {
+                const threats = [];
+                
+                if (packet.headers.some(h => h.sourcePort === 22 || h.destinationPort === 22)) {
+                    if (Math.random() > 0.7) {
+                        threats.push('SSH brute-force attempt detected');
+                    }
+                }
+                
+                if (packet.headers.some(h => h.protocol === 'HTTP' && !h.encryption)) {
+                    threats.push('Unencrypted traffic - MitM vulnerability');
+                }
+                
+                if (packet.headers.some(h => h.flags?.SYN && h.flags?.FIN)) {
+                    threats.push('SYN-FIN attack pattern detected');
+                }
+                
+                if (packet.headers.some(h => h.ttl < 5)) {
+                    threats.push('Abnormal TTL - possible route spoofing');
+                }
+                
+                return threats;
+            };
+
+            const processLayer = async (layerIndex, direction) => {
+                const layer = LAYERS[layerIndex];
+                setProcessingLayer(layerIndex);
+                setActiveLayers(prev => [...prev, layerIndex]);
+
+                await new Promise(resolve => setTimeout(resolve, delay / speed));
+
+                if (direction === 'down') {
+                    const networkData = generateNetworkData(layer);
+                    const security = generateSecurityData();
+                    
+                    addLog(layer, 'encapsulation', `Adding ${layer} layer header - Protocol: ${networkData.protocol || layer + '-Protocol'}`);
+                    
+                    if (networkData.requestUrl) {
+                        addLog(layer, 'encapsulation', `${networkData.method} ${networkData.requestUrl} - Status: ${networkData.statusCode}`);
+                    }
+                    
+                    if (networkData.sourceIP) {
+                        addLog(layer, 'encapsulation', `Routing: ${networkData.sourceIP} → ${networkData.destinationIP} (TTL: ${networkData.ttl}, Hops: ${networkData.routingPath})`);
+                    }
+                    
+                    if (networkData.sourceMAC) {
+                        addLog(layer, 'encapsulation', `MAC: ${networkData.sourceMAC} → ${networkData.destinationMAC}`);
+                        if (networkData.vlanId) {
+                            addLog(layer, 'encapsulation', `VLAN ID: ${networkData.vlanId} | Frame Type: ${networkData.protocol}`);
+                        }
+                    }
+                    
+                    if (networkData.encryption && networkData.encryption !== 'None') {
+                        addLog(layer, 'encapsulation', `Encryption: ${networkData.encryption} | Cipher: ${networkData.cipher}`);
+                        addLog(layer, 'encapsulation', `Key Exchange: ${security.encryptionKey}`);
+                        if (networkData.certificateAuthority) {
+                            addLog(layer, 'encapsulation', `Certificate: ${networkData.certificateAuthority} - VERIFIED`);
+                        }
+                    } else if (layer === 'Presentation' && networkData.encryption === 'None') {
+                        addLog(layer, 'encapsulation', `WARNING: No encryption - Data transmitted in plaintext`);
+                    }
+                    
+                    if (networkData.sourcePort) {
+                        addLog(layer, 'encapsulation', `${networkData.protocol} Connection: ${networkData.sourcePort} → ${networkData.destinationPort}`);
+                        const flags = Object.entries(networkData.flags || {}).filter(([k, v]) => v).map(([k]) => k).join(', ');
+                        if (flags) {
+                            addLog(layer, 'encapsulation', `TCP Flags: [${flags}] | Window: ${networkData.windowSize} | Checksum: ${networkData.checksum}`);
+                        }
+                    }
+                    
+                    if (networkData.sessionId) {
+                        addLog(layer, 'encapsulation', `Session initialized: ${networkData.sessionId} | Timeout: ${networkData.timeout}s | Mode: ${networkData.connectionMode}`);
+                    }
+                    
+                    if (networkData.medium) {
+                        addLog(layer, 'encapsulation', `Physical medium: ${networkData.medium} | Bitrate: ${networkData.bitrate} | Signal: ${networkData.signalStrength}`);
+                        addLog(layer, 'encapsulation', `Encoding: ${networkData.encoding} | Duplex: ${networkData.duplex} | Cable: ${networkData.cableLength}`);
+                    }
+                    
+                    setCurrentPacket(prev => ({
+                        ...prev,
+                        headers: [...prev.headers, { layer, ...networkData, security }]
+                    }));
+                } else {
+                    const header = currentPacket.headers[currentPacket.headers.length - 1];
+                    
+                    addLog(layer, 'decapsulation', `Removing ${layer} layer header - Verifying integrity`);
+                    
+                    if (header?.encryption) {
+                        addLog(layer, 'decapsulation', `Decrypting with ${header.encryption} - Key verification: PASSED`);
+                    }
+                    
+                    if (header?.checksum) {
+                        addLog(layer, 'decapsulation', `Checksum verification: ${header.checksum} - VALID`);
+                    }
+                    
+                    if (header?.frameCheckSequence) {
+                        addLog(layer, 'decapsulation', `FCS verification: ${header.frameCheckSequence} - VALID`);
+                    }
+                    
+                    const threats = detectThreats(currentPacket);
+                    if (threats.length > 0) {
+                        threats.forEach(threat => {
+                            addLog('Security', 'error', `THREAT: ${threat}`);
+                        });
+                    }
+                    
+                    setCurrentPacket(prev => ({
+                        ...prev,
+                        headers: prev.headers.slice(0, -1)
+                    }));
+                }
+
+                setProcessingLayer(null);
+            };
+
+            const startSimulation = async () => {
+                if (!payload.trim()) return;
+
+                setIsSimulating(true);
+                setLogs([]);
+                setActiveLayers([]);
+                
+                const packet = {
+                    id: `PKT-${Date.now()}`,
+                    payload: payload,
+                    headers: []
+                };
+                
+                setCurrentPacket(packet);
+                addLog('System', 'processing', 'Starting transmission...');
+
+                // Encapsulation (down)
+                for (let i = 0; i < LAYERS.length; i++) {
+                    await processLayer(i, 'down');
+                }
+
+                addLog('Physical', 'processing', 'Transmitting over physical medium...');
+                await new Promise(resolve => setTimeout(resolve, delay / speed));
+
+                // Network Analysis
+                addLog('System', 'processing', 'Performing deep packet inspection...');
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                const totalSize = payload.length + (LAYERS.length * 20);
+                addLog('System', 'processing', `Total packet size: ${totalSize} bytes | Overhead: ${(LAYERS.length * 20)} bytes`);
+                
+                // Security scan
+                addLog('Security', 'processing', 'Running security scan...');
+                await new Promise(resolve => setTimeout(resolve, 200));
+                addLog('Security', 'processing', 'Firewall: ALLOWED | IDS: NO THREATS | Antivirus: CLEAN');
+
+                // Decapsulation (up)
+                for (let i = LAYERS.length - 1; i >= 0; i--) {
+                    await processLayer(i, 'up');
+                }
+
+                addLog('System', 'processing', 'Transmission complete');
+                setIsSimulating(false);
+            };
+
+            const resetSimulation = () => {
+                setCurrentPacket(null);
+                setLogs([]);
+                setActiveLayers([]);
+                setProcessingLayer(null);
+                setIsSimulating(false);
+            };
+
+            return (
+                <div className="app">
+                    <header className="app-header">
+                        <h1>OSI MODEL SIMULATOR</h1>
+                        <p className="subtitle">
+                            Interactive demonstration of 7-layer network communication with real-time protocol visualization, encryption, routing, and security analysis
+                        </p>
+                    </header>
+
+                    <div className="main-content">
+                        {/* Left Panel - Controls */}
+                        <div className="panel control-panel">
+                            <h2>CONTROL PANEL</h2>
+                            
+                            <div className="control-section">
+                                <label>Message to Send:</label>
+                                <textarea
+                                    value={payload}
+                                    onChange={(e) => setPayload(e.target.value)}
+                                    rows={3}
+                                    disabled={isSimulating}
+                                />
+                            </div>
+
+                            <div className="control-section">
+                                <label>Protocol Type:</label>
+                                <select
+                                    value={protocol}
+                                    onChange={(e) => setProtocol(e.target.value)}
+                                    disabled={isSimulating}
+                                >
+                                    <option value="HTTPS">HTTPS (Secure)</option>
+                                    <option value="HTTP">HTTP (Insecure)</option>
+                                    <option value="FTP">FTP</option>
+                                    <option value="SSH">SSH</option>
+                                    <option value="SMTP">SMTP</option>
+                                    <option value="DNS">DNS</option>
+                                </select>
+                            </div>
+
+                            <div className="control-section">
+                                <label>Speed: {speed}x</label>
+                                <input
+                                    type="range"
+                                    min="0.5"
+                                    max="3"
+                                    step="0.5"
+                                    value={speed}
+                                    onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                                    disabled={isSimulating}
+                                />
+                            </div>
+
+                            <div className="control-section">
+                                <label>Delay: {delay}ms</label>
+                                <input
+                                    type="range"
+                                    min="200"
+                                    max="2000"
+                                    step="100"
+                                    value={delay}
+                                    onChange={(e) => setDelay(parseInt(e.target.value))}
+                                    disabled={isSimulating}
+                                />
+                            </div>
+
+                            <button
+                                className="btn btn-primary"
+                                onClick={startSimulation}
+                                disabled={isSimulating || !payload.trim()}
+                            >
+                                START SIMULATION
+                            </button>
+                            
+                            <button
+                                className="btn btn-danger"
+                                onClick={resetSimulation}
+                                disabled={isSimulating}
+                            >
+                                RESET
+                            </button>
+
+                            <div className="status-indicator">
+                                <div style={{ fontWeight: 600 }}>Status:</div>
+                                <div className={`status-value ${isSimulating ? 'active' : ''}`}>
+                                    {isSimulating ? 'RUNNING' : 'IDLE'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Center Panel - Layers */}
+                        <div className="panel">
+                            <h2>OSI Model Layers</h2>
+                            <div className="layers-container">
+                                {LAYERS.map((layer, index) => (
+                                    <div
+                                        key={layer}
+                                        className={`layer ${activeLayers.includes(index) ? 'active' : ''} ${processingLayer === index ? 'processing' : ''}`}
+                                        style={{ backgroundColor: LAYER_COLORS[layer] }}
+                                    >
+                                        <div className="layer-name">
+                                            Layer {7 - index}: {layer}
+                                        </div>
+                                        {processingLayer === index && (
+                                            <div className="packet-indicator">►</div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Right Panel - Info & Logs */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            {/* Packet Inspector */}
+                            <div className="panel packet-inspector">
+                                <h2>PACKET INSPECTOR</h2>
+                                {currentPacket ? (
+                                    <div>
+                                        <div className="packet-info">
+                                            <div className="info-row">
+                                                <span className="label">Packet ID:</span>
+                                                <span className="value">{currentPacket.id}</span>
+                                            </div>
+                                            <div className="info-row">
+                                                <span className="label">Payload:</span>
+                                                <span className="value">{currentPacket.payload}</span>
+                                            </div>
+                                            <div className="info-row">
+                                                <span className="label">Headers:</span>
+                                                <span className="value">{currentPacket.headers.length}</span>
+                                            </div>
+                                        </div>
+
+                                        {currentPacket.headers.length > 0 && (
+                                            <div>
+                                                <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem', color: '#c0c0c0' }}>Protocol Headers:</h3>
+                                                {currentPacket.headers.map((header, idx) => (
+                                                    <div key={idx} className="header-item">
+                                                        <div className="header-title">
+                                                            <div style={{ fontWeight: 700, color: '#8b2e3f' }}>{header.layer}</div>
+                                                            <div style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                                                                {header.protocol && <div>Protocol: {header.protocol}</div>}
+                                                                {header.sourceIP && <div>IP: {header.sourceIP} → {header.destinationIP}</div>}
+                                                                {header.sourceMAC && <div>MAC: {header.sourceMAC}</div>}
+                                                                {header.sourcePort && <div>Port: {header.sourcePort} → {header.destinationPort}</div>}
+                                                                {header.encryption && <div>Security: {header.encryption}</div>}
+                                                                {header.sessionId && <div>Session: {header.sessionId}</div>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p style={{ textAlign: 'center', color: '#7f8c8d', padding: '2rem' }}>
+                                        No packet in transmission
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Log Console */}
+                            <div className="panel log-console">
+                                <h2>TRANSMISSION LOG</h2>
+                                <div className="console-content">
+                                    {logs.length === 0 ? (
+                                        <div style={{ textAlign: 'center', color: '#95a5a6', padding: '2rem' }}>
+                                            Console is empty
+                                        </div>
+                                    ) : (
+                                        logs.map(log => (
+                                            <div key={log.id} className={`log-entry ${log.action}`}>
+                                                <span style={{ color: '#95a5a6', marginRight: '0.5rem', fontSize: '0.8rem' }}>
+                                                    {log.time}
+                                                </span>
+                                                <span style={{ 
+                                                    color: log.layer === 'Security' ? '#ff4444' : '#8b2e3f', 
+                                                    fontWeight: 600, 
+                                                    marginRight: '0.5rem',
+                                                    minWidth: '100px',
+                                                    display: 'inline-block'
+                                                }}>
+                                                    [{log.layer}]
+                                                </span>
+                                                <span style={{ 
+                                                    color: log.action === 'error' ? '#ff6666' : '#c0c0c0' 
+                                                }}>{log.message}</span>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
